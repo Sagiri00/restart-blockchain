@@ -10,8 +10,8 @@ contract Counter {
     }
 
     modifier onlyOwner() {
-	require(msg.sender == owner, "Hey!You are not the Owner");
-	_;
+        require(msg.sender == owner, "Hey!You are not the Owner");
+        _;
     }
 
     function setNumber(uint256 newNumber) public {
@@ -19,7 +19,7 @@ contract Counter {
         number = newNumber;
     }
 
-    function increment() public onlyOwner{
+    function increment() public onlyOwner {
         number++;
     }
 }
