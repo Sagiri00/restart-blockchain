@@ -1,24 +1,41 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX_License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {Test} from "forge-std/Test.sol";
-import {Counter} from "../src/Counter.sol";
+import "forge-std/Test.sol";
+import "../src/Counter.sol";
 
-contract CounterTest is Test {
-    Counter public counter;
+contract CounterTest is Test{
+	Counter public counter;
+	address public owner=address(1);
+	address public attacker = address(2);
 
-    function setUp() public {
-        counter = new Counter();
-        counter.setNumber(0);
-    }
+	function setUp() public {
+		vm.prank(owner);
+		counter = new Counter();
 
-    function test_Increment() public {
-        counter.increment();
-        assertEq(counter.number(), 1);
-    }
+		vm.prank(owner);
+		counter.setNumber(0);
+	}
 
-    function testFuzz_SetNumber(uint256 x) public {
-        counter.setNumber(x);
-        assertEq(counter.number(), x);
-    }
+	//SUCCESS CASE
+	function test_IncrementAsOwner() public {
+		vm.prank(owner);
+		counter.increment();
+		assertEq(counter.number(), 1);
+	}
+
+	//SECURITY CASE 1: Precise Revert for Increment
+	function test_RevertWhen_NonOwnerIncrements() public {
+		vm.prank(attacker);
+		//We tell Foundry: "The VERY NEXT line must fail with THIS exact message"
+		vm.expectRevert("Hey!You are not the Owner");
+		counter.increment();
+	}
+
+	// SECURITY CASE 2: Precise Revery for SetNumber
+	function test_RevertWhen_NonOwnerSetsNumber() public {
+		vm.prank(attacker);
+		vm.expectRevert("Hey!You are not the Owner");
+		counter.setNumber(999);
+	}
 }
